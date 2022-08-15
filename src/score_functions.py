@@ -45,7 +45,7 @@ def egonet_homophily_scores(g, calc_bool = True):
             local_net = set(g.neighbors(n))
             local_net.add(n)
 
-            targets = list(set(nodes.keys()) - local_net)
+            targets = [ nd for nd, l in nx.single_source_shortest_path_length(g, n, cutoff=2).items() if l > 1 ]
 
             for t in targets:
                 common_neighbors = list(nx.common_neighbors(g, n, t))
@@ -99,10 +99,8 @@ def adj_homophily_scores(g, calc_bool = True):
                 print(f'Progress: {i/len(nodes)}')
             i=i+1
 
-            local_net = set(g.neighbors(n))
-            local_net.add(n)
 
-            targets = list(set(nodes.keys()) - local_net)
+            targets = [ nd for nd, l in nx.single_source_shortest_path_length(g, n, cutoff=2).items() if l > 1 ]
 
             for t in targets:
                 num_common_neighbors = len(list(nx.common_neighbors(g, n, t)))

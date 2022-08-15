@@ -122,7 +122,8 @@ def get_score_recs(g, rec_scores):
             print(f'unable to find paring for {n}. t = {t}.')
 
         if (t, n) in rec_pairs:
-            print(f'{n} - {t} already in network...')
+            # print(f'{n} - {t} already in network...')
+            pass
 
         rec_pairs.append((n, t))
 
@@ -336,8 +337,6 @@ def get_cn_ranks(g, recs):
 
         n = r[0]
 
-        local_net = set(g.neighbors(n))
-        local_net.add(n)
 
         max_neighbors = 0
         max_t = 'error'
@@ -389,14 +388,11 @@ if __name__ == "__main__":
     # convert from multigraph to standard graph
     g = nx.Graph(g)
 
-    print(f'num nodes b4: {len(g.nodes())}')
 
     # original network: 22405 nodes
     # 10 gives 2351
     if thresh_net:
         g = thresh_network(g, 10)
-
-    print(f'num nodes after: {len(g.nodes())}')
 
     nodes = g.nodes(data=True)
     edges = g.edges()
@@ -412,29 +408,48 @@ if __name__ == "__main__":
 
     groups = [con, lib, cen]
 
+    # polar_scores = calc_polarization(g)
     if thresh_net:
         polar_scores = calc_polarization(g)
     else:
         polar_scores = read_polarization() # On full network
         
 
-    homophily_graph(polar_scores, 'polarization_graph.pdf')
+    # homophily_graph(polar_scores, 'polarization_graph.pdf')
 
     print('getting cn and cn_op recs...')
     # cn_recs = cn_rec(g, re_calc, full_net = not thresh_net)
     cn_op_recs = op_cn_rec(g, re_calc, full_net = not thresh_net)
     print('done')
     
-    full_cn_op = supp_cn_op(g, cn_op_recs)
+    print('getting scores...')
+    # calc scores
+    # egonet_homophily_scores(g)
+    
+    #read scores from pickle
+    pickle_file = 'full_net_pkl/ego_h_score.pickle'
+    with open(pickle_file, 'rb') as fileref:
+        scores = pickle.load(fileref)
+        
+    recs = get_score_recs(g, scores)
+    
+    node_limit = [r[0] for r in cn_op_recs]
+    limited_recs = [r for r in recs if r[0] in node_limit]
+    
+    # use limited recommendations for metrics
+    recs = limited_recs
+    
+    # full_cn_op = supp_cn_op(g, cn_op_recs)
     
 
-    scores = op_cn_scores(g, True, False)
+    # scores = op_cn_scores(g, True, False)
     
-    print("getting ndcg...")
-    print("ndcg: ", get_ndcg(g, scores))
+    # print("getting ndcg...")
+    # print("ndcg: ", get_ndcg(g, scores))
 
+    
 
-    rankings = get_cn_ranks(g, full_cn_op)
+    rankings = get_cn_ranks(g, recs)
 
     print('Mean rank: ', np.mean([rec_comp[0] for rec_comp in rankings]))
     print('Median rank: ', np.median([rec_comp[0] for rec_comp in rankings]))
@@ -446,7 +461,7 @@ if __name__ == "__main__":
 
 
     # links_to_add = get_score_recs(g, scores)
-    links_to_add = full_cn_op
+    links_to_add = recs
 
     print(len(links_to_add))
 

@@ -113,12 +113,10 @@ def cn_rec(g, calc_bool, full_net = False):
                 print(f'Progress: {i/len(nodes)}')
             i = i+1
 
-            local_net = set(g.neighbors(n))
-            local_net.add(n)
 
             max_neighbors = 0
             max_t = 'error'
-            for t in list(set(nodes.keys()) - local_net):
+            for t in [ n for n, l in nx.single_source_shortest_path_length(g, n, cutoff=2).items() if l > 1 ]:
 
                 num_neighbors = len(list(nx.common_neighbors(g, n, t)))
 
@@ -127,7 +125,8 @@ def cn_rec(g, calc_bool, full_net = False):
                     max_neighbors = num_neighbors
 
             if max_t == 'error':
-                print(f'no suggestion available for node: {n}')
+                # print(f'no suggestion available for node: {n}')
+                pass
             else:
                 edges_to_add.append((n, max_t))
 
@@ -166,12 +165,10 @@ def op_cn_rec(g, calc_bool, full_net = False):
                 print(f'Progress: {i/len(nodes)}')
             i = i+1
 
-            local_net = set(g.neighbors(n))
-            local_net.add(n)
 
             max_neighbors = 0
             max_t = 'error'
-            for t in list(set(nodes.keys()) - local_net):
+            for t in [ n for n, l in nx.single_source_shortest_path_length(g, n, cutoff=2).items() if l > 1 ]:
 
                 num_neighbors = len(list(nx.common_neighbors(g, n, t)))
 
@@ -180,7 +177,8 @@ def op_cn_rec(g, calc_bool, full_net = False):
                     max_neighbors = num_neighbors
 
             if max_t == 'error':
-                print(f'no suggestion available for node: {n}')
+                # print(f'no suggestion available for node: {n}')
+                pass
             else:
                 edges_to_add.append((n, max_t))
 
@@ -240,7 +238,8 @@ def op_cn_scores(g, calc_bool, full_net = False):
                     max_neighbors = num_neighbors
 
             if max_t == 'error':
-                print(f'no suggestion available for node: {n}')
+                # print(f'no suggestion available for node: {n}')
+                pass
             else:
                 edges_to_add.append((n, max_t))
 
